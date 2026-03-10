@@ -1,28 +1,33 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { VerticalGraph } from "../charts/VerticalGraph";
+import { holdings } from "../data/data"; // <-- Import your dummy holdings
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
 
-  // Backend se holdings fetch karna
+  // Load dummy holdings data
   useEffect(() => {
-    axios.get("http://localhost:3002/allHoldings")
-      .then((res) => {
-        setAllHoldings(res.data);
-      })
-      .catch((err) => console.log("Error fetching holdings:", err));
+    setAllHoldings(holdings);
   }, []);
 
   // Professional Calculations
-  const totalInvestment = allHoldings.reduce((acc, stock) => acc + (stock.avg * stock.qty), 0);
-  const currentValue = allHoldings.reduce((acc, stock) => acc + (stock.price * stock.qty), 0);
+  const totalInvestment = allHoldings.reduce(
+    (acc, stock) => acc + stock.avg * stock.qty,
+    0
+  );
+  const currentValue = allHoldings.reduce(
+    (acc, stock) => acc + stock.price * stock.qty,
+    0
+  );
   const totalPnL = currentValue - totalInvestment;
   const pnlPercent = totalInvestment > 0 ? (totalPnL / totalInvestment) * 100 : 0;
 
   return (
     <div className="holdings-container p-4">
-      <h3 className="title mb-4" style={{ fontSize: "18px", fontWeight: "600", color: "#444" }}>
+      <h3
+        className="title mb-4"
+        style={{ fontSize: "18px", fontWeight: "600", color: "#444" }}
+      >
         Holdings ({allHoldings.length})
       </h3>
 
@@ -43,7 +48,7 @@ const Holdings = () => {
             {allHoldings.map((stock, index) => {
               const investment = stock.avg * stock.qty;
               const curValue = stock.price * stock.qty;
-              const isProfit = (curValue - investment) >= 0;
+              const isProfit = curValue - investment >= 0;
               const netChange = ((curValue - investment) / investment) * 100;
 
               return (
@@ -53,11 +58,17 @@ const Holdings = () => {
                   <td>{stock.avg.toFixed(2)}</td>
                   <td>{stock.price.toFixed(2)}</td>
                   <td>{curValue.toFixed(2)}</td>
-                  <td style={{ color: isProfit ? "#4caf50" : "#ff5722", fontWeight: "500" }}>
+                  <td
+                    style={{
+                      color: isProfit ? "#4caf50" : "#ff5722",
+                      fontWeight: "500",
+                    }}
+                  >
                     {(curValue - investment).toFixed(2)}
                   </td>
                   <td style={{ color: isProfit ? "#4caf50" : "#ff5722" }}>
-                    {isProfit ? "+" : ""}{netChange.toFixed(2)}%
+                    {isProfit ? "+" : ""}
+                    {netChange.toFixed(2)}%
                   </td>
                 </tr>
               );
@@ -78,7 +89,8 @@ const Holdings = () => {
         </div>
         <div className="col-md-4">
           <h4 style={{ color: totalPnL >= 0 ? "#4caf50" : "#ff5722" }}>
-            {totalPnL >= 0 ? "+" : ""}{totalPnL.toFixed(2)} 
+            {totalPnL >= 0 ? "+" : ""}
+            {totalPnL.toFixed(2)}{" "}
             <small style={{ fontSize: "14px", marginLeft: "8px" }}>
               ({pnlPercent.toFixed(2)}%)
             </small>
@@ -89,19 +101,25 @@ const Holdings = () => {
 
       {/* --- Visual Analysis (Pink Graph) --- */}
       <div className="mt-5 bg-white p-4 rounded shadow-sm mb-5">
-        <h5 className="text-muted mb-4 text-center">Portfolio Value Distribution (LTP)</h5>
+        <h5 className="text-muted mb-4 text-center">
+          Portfolio Value Distribution (LTP)
+        </h5>
         <div style={{ height: "300px" }}>
-          <VerticalGraph data={{
-            labels: allHoldings.map((s) => s.name),
-            datasets: [{ 
-              label: "Current Price", 
-              data: allHoldings.map((s) => s.price), 
-              backgroundColor: "rgba(255, 182, 193, 0.7)", 
-              borderColor: "rgba(255, 105, 180, 1)", 
-              borderWidth: 1,
-              borderRadius: 5
-            }]
-          }} />
+          <VerticalGraph
+            data={{
+              labels: allHoldings.map((s) => s.name),
+              datasets: [
+                {
+                  label: "Current Price",
+                  data: allHoldings.map((s) => s.price),
+                  backgroundColor: "rgba(255, 182, 193, 0.7)",
+                  borderColor: "rgba(255, 105, 180, 1)",
+                  borderWidth: 1,
+                  borderRadius: 5,
+                },
+              ],
+            }}
+          />
         </div>
       </div>
     </div>
