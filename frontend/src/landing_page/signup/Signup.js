@@ -4,7 +4,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 function Signup() {
-  // Password ko bhi formData ke andar hi rakha hai
+  // formData state: name, email aur password store karne ke liye
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -12,7 +12,8 @@ function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3002/signup", {
+      // ✅ LOCALHOST HATA KAR RENDER URL DAAL DIYA HAI
+      const response = await axios.post("https://stock-tradingplatform.onrender.com/signup", {
         username: formData.name,
         email: formData.email,
         password: formData.password,
@@ -28,9 +29,10 @@ function Signup() {
         }).then(() => navigate("/login"));
       }
     } catch (error) {
+      // Agar backend offline ho ya error aaye toh ye message dikhega
       Swal.fire({
         title: "Signup Failed",
-        text: error.response?.data?.message || "Server connection failed.",
+        text: error.response?.data?.message || "Server connection failed. Please wait, Backend might be waking up!",
         icon: "error",
       });
     }
@@ -40,6 +42,7 @@ function Signup() {
     <div className="container mt-5 p-5">
       <div className="row align-items-center">
         <div className="col-lg-7">
+          {/* Signup Image */}
           <img src="media/images/signup.png" alt="Signup" className="img-fluid" />
         </div>
         <div className="col-lg-5 p-5 border rounded shadow-sm bg-white">
@@ -65,7 +68,6 @@ function Signup() {
                 type={showPassword ? "text" : "password"}
                 className="form-control p-3"
                 placeholder="Password"
-                // Yahan formData update ho raha hai
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
@@ -74,16 +76,21 @@ function Signup() {
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {/* Ab yahan aankh dikhegi */}
+                {/* Eye icon for toggle password */}
                 <i className={showPassword ? "fa fa-eye-slash" : "fa fa-eye"}></i>
               </button>
             </div>
 
-            <button className="btn btn-primary w-100 p-2 fs-5" style={{ backgroundColor: "#387ed1", border: "none" }}>
+            <button 
+              className="btn btn-primary w-100 p-2 fs-5" 
+              style={{ backgroundColor: "#387ed1", border: "none" }}
+            >
               Continue
             </button>
           </form>
-          <p className="mt-3 text-center">Already have an account? <Link to="/login">Login</Link></p>
+          <p className="mt-3 text-center">
+            Already have an account? <Link to="/login">Login</Link>
+          </p>
         </div>
       </div>
     </div>

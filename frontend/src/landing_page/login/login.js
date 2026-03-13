@@ -12,13 +12,13 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3002/login", { 
+      // ✅ LOCALHOST HATA KAR RENDER BACKEND URL DAAL DIYA HAI
+      const response = await axios.post("https://stock-tradingplatform.onrender.com/login", { 
         email, 
         password 
       });
 
       if (response.data.success) {
-        // YAHAN BADLAV KIYA HAI: localStorage ki jagah sessionStorage
         sessionStorage.setItem("token", response.data.token);
         sessionStorage.setItem("username", response.data.username);
 
@@ -29,14 +29,16 @@ function Login() {
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
-          navigate("/"); // Home page par redirect
+          // Dashboard par bhejne ke liye agar Dashboard alag URL par hai toh window.location use karein
+          // Agar same project mein hai toh navigate("/") sahi hai
+          navigate("/"); 
           window.location.reload(); 
         });
       }
     } catch (error) {
       Swal.fire({
         title: "Login Failed",
-        text: error.response?.data?.message || "Invalid Email or Password",
+        text: error.response?.data?.message || "Invalid Email or Password or Server Down",
         icon: "error",
       });
     }
