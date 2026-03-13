@@ -4,13 +4,11 @@ import { Link } from "react-router-dom";
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [displayName, setDisplayName] = useState("USER"); // Default name
+  const [displayName, setDisplayName] = useState("USER");
 
   useEffect(() => {
-    // ✅ FIX: Parameter ka naam 'user' hona chahiye, kyunki humne wahi bheja hai
     const params = new URLSearchParams(window.location.search);
-    const user = params.get("user"); 
-    
+    const user = params.get("user");
     if (user) {
       setDisplayName(user);
     }
@@ -24,12 +22,18 @@ const Menu = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
+  // ✅ Logout Logic
+  const handleLogout = () => {
+    sessionStorage.clear(); // Saara data clear
+    // Wapas Frontend (Landing Page) par bhejne ke liye:
+    window.location.href = "https://stock-tradingplatform-frontend-49y0.onrender.com/"; 
+  };
+
   const menuClass = "menu";
   const activeMenuClass = "menu selected";
 
   return (
     <div className="menu-container">
-      {/* Zerodha jaisa logo width thodi badi kar sakte ho */}
       <img src="logo.png" style={{ width: "30px", marginRight: "20px" }} alt="Logo" />
       
       <div className="menus">
@@ -57,26 +61,40 @@ const Menu = () => {
         </ul>
         <hr />
         
-        {/* Profile Section */}
-        <div className="profile" onClick={handleProfileClick} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
-          <div className="avatar" style={{ 
-            backgroundColor: "#387ed1", 
-            color: "white", 
-            borderRadius: "50%", 
-            width: "30px", 
-            height: "30px", 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: "14px"
-          }}>
-            {/* Pehla akshar display karega */}
-            {displayName.charAt(0).toUpperCase()}
+        {/* Profile Section with Dropdown */}
+        <div className="profile-wrapper" style={{ position: "relative" }}>
+          <div className="profile" onClick={handleProfileClick} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
+            <div className="avatar" style={{ 
+              backgroundColor: "#387ed1", color: "white", borderRadius: "50%", 
+              width: "30px", height: "30px", display: "flex", 
+              alignItems: "center", justifyContent: "center", fontWeight: "bold"
+            }}>
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+            <p className="username" style={{ margin: 0, fontWeight: "500" }}>{displayName.toUpperCase()}</p>
           </div>
-          <p className="username" style={{ margin: 0, fontWeight: "500", fontSize: "14px", color: "#424242" }}>
-            {displayName.toUpperCase()}
-          </p>
+
+          {/* ✅ Dropdown Menu */}
+          {isProfileDropdownOpen && (
+            <div className="profile-dropdown" style={{
+              position: "absolute", top: "40px", right: "0",
+              backgroundColor: "white", border: "1px solid #ccc",
+              borderRadius: "4px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+              zIndex: 100, width: "120px"
+            }}>
+              <button 
+                onClick={handleLogout}
+                style={{
+                  width: "100%", padding: "10px", border: "none",
+                  backgroundColor: "transparent", cursor: "pointer",
+                  textAlign: "left", color: "#d9534f", fontWeight: "bold"
+                }}
+              >
+                <i className="fa fa-sign-out" style={{ marginRight: "8px" }}></i>
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
