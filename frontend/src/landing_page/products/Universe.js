@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"; // Link import zaroori hai
 
 function Universe() {
   const token = sessionStorage.getItem("token");
@@ -9,6 +10,7 @@ function Universe() {
         <h1 className="mt-5" style={{ color: "#424242", fontWeight: "500" }}>The Zerodha Universe</h1>
         <p className="mt-3">Extend your trading and investment experience even further with our partner platforms</p>
 
+        {/* Partners Logos */}
         <div className="col-lg-4 col-md-6 col-sm-12 p-3 mt-5">
           <img src="media/images/smallcaseLogo.png" style={{ width: "60%" }} alt="smallcase" />
           <p className="text-muted mt-3" style={{ fontSize: "12px" }}>Thematic investment platform</p>
@@ -36,21 +38,23 @@ function Universe() {
 
         <div className="mt-5 mb-5">
           {token ? (
+            /* ✅ Localhost hata kar Render Dashboard URL daal diya */
             <a 
-              href="http://localhost:3001" 
+              href="https://stock-trading-platform2.onrender.com/" 
               className="btn btn-primary fs-5" 
               style={{ width: "200px", backgroundColor: "#387ed1", border: "none", padding: "10px", borderRadius: "3px", color: "white", textDecoration: "none", display: "inline-block" }}
             >
               Go to Dashboard
             </a>
           ) : (
-            <a 
-              href="/signup" 
+            /* ✅ a tag ki jagah Link to use kiya internal navigation ke liye */
+            <Link 
+              to="/signup" 
               className="btn btn-primary fs-5" 
               style={{ width: "200px", backgroundColor: "#387ed1", border: "none", padding: "10px", borderRadius: "3px", color: "white", textDecoration: "none", display: "inline-block" }}
             >
               Sign up now
-            </a>
+            </Link>
           )}
         </div>
       </div>
