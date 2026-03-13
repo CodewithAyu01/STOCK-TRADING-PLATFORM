@@ -6,24 +6,98 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    methods: ["GET", "POST"],
+    credentials: true
+}));
+
 app.use(express.json());
 
-// Connect to MongoDB Atlas (Mongoose 7+)
+// MongoDB Connection
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-const UserSchema = new mongoose.Schema({
+// --- MODELS (Pehle Schema, Phir Model) ---
+
+const User = mongoose.model("User", new mongoose.Schema({
   username: String,
-  email: String,
-  password: String,
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+}));
+
+const Holding = mongoose.model("Holding", new mongoose.Schema({
+  name: String,
+  qty: Number,
+  avg: Number,
+  price: Number,
+  net: String,
+  day: String,
+}));
+
+// Positions Schema aur Model ko yahan saath mein rakhein
+const PositionsSchema = new mongoose.Schema({
+  product: String,
+  name: String,
+  qty: Number,
+  avg: Number,
+  price: Number,
+  net: String,
+  day: String,
+  isLoss: Boolean,
+});
+//orders
+const Order = mongoose.model("Order", new mongoose.Schema({
+    name: String,
+    qty: Number,
+    price: Number,
+    mode: String,
+}));
+
+// Model humesha Schema ke BAAD banta hai
+const Position = mongoose.model("position", PositionsSchema);
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+
+// --- ROUTES ---
+
+app.get("/allHoldings", async (req, res) => {
+  try {
+    const allHoldings = await Holding.find({});
+    res.status(200).json(allHoldings);
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error fetching holdings" });
+  }
 });
 
-const User = mongoose.model("User", UserSchema);
-const JWT_SECRET = process.env.JWT_SECRET;
+app.get("/allPositions", async (req, res) => {
+  try {
+    const allPositions = await Position.find({}); 
+    res.status(200).json(allPositions);
+  } catch (err) {
+    console.log("DB Error:", err);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
+app.post("/newOrder", async (req, res) => {
+  try {
+    const newOrder = new Order({
+      name: req.body.name,
+      qty: req.body.qty,
+      price: req.body.price,
+      mode: req.body.mode,
+    });
 
-// Signup route
+    await newOrder.save();
+    res.status(201).json({ success: true, message: "Order placed successfully!" });
+  } catch (err) {
+    console.error("Order Error:", err);
+    res.status(500).json({ success: false, message: "Failed to place order" });
+  }
+});
+
 app.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -33,31 +107,27 @@ app.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ username, email, password: hashedPassword });
     await newUser.save();
-
-    res.json({ success: true, message: "Signup successful" });
+    res.status(201).json({ success: true, message: "Signup successful" });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: "Signup failed" });
   }
 });
 
-// Login route
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ success: false, message: "Invalid credentials" });
+    if (!user) return res.status(400).json({ success: false, message: "User not found" });
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return res.status(400).json({ success: false, message: "Invalid credentials" });
+    if (!isPasswordValid) return res.status(400).json({ success: false, message: "Wrong password" });
 
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
-
     res.json({ success: true, username: user.username, token });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: "Login failed" });
   }
 });
 
-app.listen(3002, () => console.log("Server running on port 3002"));
+const PORT = process.env.PORT || 3002;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
