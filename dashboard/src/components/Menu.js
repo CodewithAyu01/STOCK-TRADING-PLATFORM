@@ -7,8 +7,8 @@ const Menu = () => {
   const [displayName, setDisplayName] = useState("USER");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const user = params.get("user");
+    // ✅ FIX: URL ke bajaye sessionStorage se username le rahe hain
+    const user = sessionStorage.getItem("username");
     if (user) {
       setDisplayName(user);
     }
@@ -22,10 +22,9 @@ const Menu = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
-  // ✅ Logout Logic
   const handleLogout = () => {
-    sessionStorage.clear(); // Saara data clear
-    // Wapas Frontend (Landing Page) par bhejne ke liye:
+    sessionStorage.clear(); 
+    // Redirect back to Landing Page
     window.location.href = "https://stock-tradingplatform-frontend-49y0.onrender.com/"; 
   };
 
@@ -61,7 +60,6 @@ const Menu = () => {
         </ul>
         <hr />
         
-        {/* Profile Section with Dropdown */}
         <div className="profile-wrapper" style={{ position: "relative" }}>
           <div className="profile" onClick={handleProfileClick} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
             <div className="avatar" style={{ 
@@ -74,7 +72,6 @@ const Menu = () => {
             <p className="username" style={{ margin: 0, fontWeight: "500" }}>{displayName.toUpperCase()}</p>
           </div>
 
-          {/* ✅ Dropdown Menu */}
           {isProfileDropdownOpen && (
             <div className="profile-dropdown" style={{
               position: "absolute", top: "40px", right: "0",
